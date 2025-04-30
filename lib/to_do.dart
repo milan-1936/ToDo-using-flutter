@@ -12,15 +12,12 @@ class Screen_1 extends StatefulWidget {
 class _Screen_1State extends State<Screen_1> {
 
   final GlobalKey<FormState> _todoFormKey = GlobalKey();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  String thisTitle = "";
+  String thisDescription = "";
 
 
-  List<Todo> todos = [
-    Todo(id: "1", title: "This is demo 1", description: "Yo ta sakkiyo"),
-    Todo(id: "2", title: "This is demo 2", description: "Second nii sakkiyo", isCompleted: true),
-    Todo(id: "3", title: "This is demo 3", description: "Yo ta jhan sakki halyo nii")
-  ];
+
+  List<Todo> todos = [];
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +28,68 @@ class _Screen_1State extends State<Screen_1> {
       body: Column(
         children: [
        
-        SizedBox(
-          height: 500,
-          width: double.infinity,
-          child: ListView.builder(itemBuilder: (ctx, i){
+        Expanded(
+         
+          child:
+                todos.isEmpty
+                    ? Center(child: Text("Kei kam garna baki xaina aba ta"))
+                    : ListView.builder(
+                      itemBuilder: (ctx, i) {
           return ListTile(
               leading: Checkbox(
                 value: todos[i].isCompleted,
-                onChanged:(value){},
+                onChanged:(value){
+                  setState(() {
+                    todos[i].isCompleted = value!;
+                  });
+                },
+              
               ),
-              title: Text(todos[i].title),
+              trailing: IconButton(onPressed: (){
+                showDialog(context: (context), builder: (context){
+                    return AlertDialog(
+                      title: Text("Are you sure, you want to delete?"),
+                      content: Text("This action is not reversible"),
+                      actions: [
+                              FilledButton(
+                                onPressed: () {
+                                  setState(() {
+                                    todos.remove(todos[i]);
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    
+                                    SnackBar(content: Text("Deleted"),
+                                    backgroundColor: Colors.greenAccent.shade700,
+                                    dismissDirection: DismissDirection.endToStart,
+                                    duration: Duration(seconds: 1),
+                                    
+                                    ),
+                                  );
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text("Yes"),
+                              ),
+                              FilledButton.tonal(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text("No"),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                            ],
+                    );
+                });
+              }, icon: Icon(Icons.delete_outline_rounded)),
+              title: Text(
+                todos[i].title,
+              style: TextStyle(
+                color: todos[i].isCompleted? Colors.red: null,
+                decoration: todos[i].isCompleted? TextDecoration.lineThrough: null,
+                
+              ),),
               subtitle: Text(todos[i].description),
             );
           },
@@ -67,7 +116,7 @@ class _Screen_1State extends State<Screen_1> {
                   children: [
                         Text("Add Todo", style: TextStyle(fontSize: 20)),
                         TextFormField(
-                          controller: _titleController,
+                          
                           decoration: InputDecoration(hintText: "What to do?"),
                           validator: (value){
                             if(value == null || value.isEmpty){
@@ -76,10 +125,18 @@ class _Screen_1State extends State<Screen_1> {
                               return null;
                             }
                           },
+                          onSaved: (value){
+                            setState(() {
+                              thisTitle = value!;
+                            });
+                          },
+                          onTapOutside: (event) {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                          },
                           
                         ),
                         TextFormField(
-                          controller: _descriptionController,
+                          
                           decoration: InputDecoration(hintText: "Description"),
                           maxLines: 3,
                           validator: (value){
@@ -89,9 +146,17 @@ class _Screen_1State extends State<Screen_1> {
                               return null;
                             }
                           }, 
-                          
-                        
+                          onSaved: (value){
+                            setState(() {
+                              thisDescription = value!;
+                            });
+                          },
+
+                          onTapOutside: (event) {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                          },
                         ),
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -100,25 +165,24 @@ class _Screen_1State extends State<Screen_1> {
                                 if (!_todoFormKey.currentState!.validate()) {
                                   return;
                                 }
+                                _todoFormKey.currentState!.save();
                                 setState(() {
                                   todos.add(
                                     Todo(
                                       id: DateTime.now().toString(),
-                                      description: _descriptionController.text,
-                                      title: _titleController.text,
+                                      description: thisDescription,
+                                      title: thisTitle,
                                     ),
                                   );
                                 });
-                                _todoFormKey.currentState!.save();
+                                Navigator.of(context).pop();
                               },
                               child: Text("Add todo"),
                             ),
 
 
                             FilledButton(onPressed: (){
-                              if(!_todoFormKey.currentState!.validate()){
-                                return;
-                              }
+                              Navigator.of(context).pop();
                             }, child: Text("Back"),)
                           ],
                         ),
