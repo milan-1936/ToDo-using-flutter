@@ -7,6 +7,7 @@ import 'package:to_do_application/model/users.dart';
 
 class TodoProvider extends ChangeNotifier{
     List<Todo> _todos = [];
+    List _apiTodo =[];
     List<Users> _users = [];
     List _apiUsers = [];
 
@@ -44,33 +45,17 @@ class TodoProvider extends ChangeNotifier{
 
     fetchData() async {
     final response = await http.get(
-      Uri.parse('https://randomuser.me/api/?results=5'),
+      Uri.parse('http://127.0.0.1:8000/todo'),
     );
     final data = jsonDecode(response.body);
-    _apiUsers = data['results'];
-    _apiUsers.forEach((user) {
-      _users.add(
-        Users(
-          name: Name(
-            title: user['name']['title'],
-            first: user['name']['first'],
-            last: user['name']['last'],
-          ),
-          add: Address(
-            city: user['location']['city'],
-            state: user['location']['state'],
-            country: user['location']['country'],
-          ),
-          gender: user['gender'],
-          email: user['email'],
-          profilePic: user['picture']['thumbnail'],
-        ),
-      );
+    _apiTodo = data;
+    _apiTodo.forEach((todo) {
+      _todos.add(Todo(title: todo['title'], description: todo['description'], isCompleted: false, id: todo['id'].toString()));
     });
 
-    _users.forEach((myuser) {
-      print(myuser.name.first);
-    });
+    // _users.forEach((myuser) {
+    //   print(myuser.name.first);
+    // });
 
     notifyListeners();
   }
