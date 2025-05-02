@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:to_do_application/model/todo.dart';
+import 'package:http/http.dart' as http;
+import 'package:to_do_application/model/users.dart';
 
 class TodoProvider extends ChangeNotifier{
     List<Todo> _todos = [];
-
-
+    List<Users> _users = [];
+    List _apiUsers = [];
 
     // events
 
@@ -21,7 +25,7 @@ class TodoProvider extends ChangeNotifier{
         title: thistitle,
       ),
     );
-    print(_todos);
+
       // at last we should notfiy listeners
       notifyListeners();
     }
@@ -32,4 +36,51 @@ class TodoProvider extends ChangeNotifier{
       // at last we should notify listeners
       notifyListeners();
     }
-}
+
+    isCompleted({required Todo thistodo, required bool iscompleted}){
+      thistodo.isCompleted = iscompleted;
+      notifyListeners();
+    }
+
+    fetchData() async {
+    final response = await http.get(
+      Uri.parse('https://randomuser.me/api/?results=5'),
+    );
+    final data = jsonDecode(response.body);
+    _apiUsers = data['results'];
+    _apiUsers.forEach((user) {
+      _users.add(
+        Users(
+          name: Name(
+            title: user['name']['title'],
+            first: user['name']['first'],
+            last: user['name']['last'],
+          ),
+          add: Address(
+            city: user['location']['city'],
+            state: user['location']['state'],
+            country: user['location']['country'],
+          ),
+          gender: user['gender'],
+          email: user['email'],
+          profilePic: user['picture']['thumbnail'],
+        ),
+      );
+    });
+
+    _users.forEach((myuser) {
+      print(myuser.name.first);
+    });
+
+    notifyListeners();
+  }
+      
+    List<Users> getUsers(){
+      return _users;
+    }
+
+
+
+
+
+    }

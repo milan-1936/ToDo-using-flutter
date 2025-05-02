@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:to_do_application/model/todo.dart';
+import 'package:to_do_application/fetch_api.dart';
 import 'package:to_do_application/providers/todo_provider.dart';
 import 'package:to_do_application/screen_2.dart';
 
@@ -12,10 +12,6 @@ class Screen_1 extends StatefulWidget {
 }
 
 class _Screen_1State extends State<Screen_1> {
-  final GlobalKey<FormState> _todoFormKey = GlobalKey();
-  String thisTitle = "";
-  String thisDescription = "";
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,9 +31,7 @@ class _Screen_1State extends State<Screen_1> {
                           leading: Checkbox(
                             value: todos[i].isCompleted,
                             onChanged: (value) {
-                              setState(() {
-                                todos[i].isCompleted = value!;
-                              });
+                              providerContext.isCompleted(thistodo:todos[i] ,iscompleted: value!);
                             },
                           ),
                           trailing: IconButton(
@@ -110,9 +104,14 @@ class _Screen_1State extends State<Screen_1> {
               },
             ),
           ),
+          FilledButton(onPressed: (){
+            context.read<TodoProvider>().fetchData();
+            Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ApiData()));
+
+          }, child: Text("Fetch Data from API")),
         ],
       ),
-
+      
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) => TodoForm()));
