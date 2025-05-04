@@ -44,7 +44,7 @@ class _TodoFormState extends State<TodoForm> {
                   FocusScope.of(context).requestFocus(FocusNode());
                 },
                 decoration: InputDecoration(
-                  hintText: "What is to do?",
+                   hintText: "What is to do?",
                   label: Text("add todo"),
                 ),
                 validator: (value){
